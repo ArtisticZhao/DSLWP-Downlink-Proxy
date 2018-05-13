@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<settings>
+<nickname>BY2HIT</nickname>
+<lon>125</lon>
+<lat>45</lat>
+<alt>12</alt>
+<backup_server_url>null</backup_server_url>
+<back_server_enable>0</back_server_enable>
+<tle_url>http://lilacsat.hit.edu.cn/tle/TLE.txt</tle_url>
+</settings>
