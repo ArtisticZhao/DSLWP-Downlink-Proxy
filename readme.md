@@ -12,12 +12,13 @@ https://wiki.gnuradio.org/index.php/InstallingGRFromSource
 if you installed gnu radio you can follow those step to check your system:
 - run gnu radio  
 ```$ gnuradio-companion```   
-  after this command you will see a GUI of gnuradio.
+  after this command you will see a GUI of gnuradio.  
+![grc](https://raw.githubusercontent.com/ArtisticZhao/DSLWP-Downlink-Proxy/master/guide_images/00.png)
 - connect your device(like USRP) to your computer.
 - run the script  
 open the script from "grc_dslwp_new/frontend_dslwp_rx_uhd.grc"
-and click run button. if the window show up, it works!!
-
+and click run button. if the window show up, it works!!  
+![grc is working](https://raw.githubusercontent.com/ArtisticZhao/DSLWP-Downlink-Proxy/master/guide_images/01.png)
 
 # Downlink Proxy
 ----------------------------------------------------------------------------------
@@ -64,4 +65,7 @@ or
 
 ## To configure proxy
 Usually, the proxy is configured.   
-You only to change your **nickname**, **longitude**, **latitude**, **altitude**(altitude is not necessary)
+You only to change your **nickname**, **longitude**, **latitude**, **altitude**(altitude is not necessary)  
+![configure proxy](https://raw.githubusercontent.com/ArtisticZhao/DSLWP-Downlink-Proxy/master/guide_images/02.png)
+if you send the date to server sucessful. server will return some text.  
+![proxy send](https://raw.githubusercontent.com/ArtisticZhao/DSLWP-Downlink-Proxy/master/guide_images/03.png)
