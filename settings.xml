@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <settings>
-<nickname>test</nickname>
-<lon>12</lon>
-<lat>12</lat>
+<nickname>BY2HIT</nickname>
+<lon>45</lon>
+<lat>125</lat>
 <alt>12</alt>
-<server_url>ws://127.0.0.1</server_url>
+<server_url>ws://202.118.254.127</server_url>
 <backup_server_url>huhuhuh</backup_server_url>
 <back_server_enable>0</back_server_enable>
-<server_port>9000</server_port>
+<server_port>9010</server_port>
 <tle_url>http://lilacsat.hit.edu.cn/tle/TLE.txt</tle_url>
 <port_1>60061</port_1>
 <port_1_sat>DSLWP-A</port_1_sat>
