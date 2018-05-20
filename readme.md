@@ -48,7 +48,7 @@ to install pip for python2.7
 
 to install python environment  
 ```
-$ sudo python -m pip install tornado
+$ sudo python -m pip install tornado==4.5.3
 $ sudo python -m pip install requests
 $ sudo apt install python-dbus
 $ sudo apt install python-qt4
