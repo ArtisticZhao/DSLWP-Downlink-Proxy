@@ -20,13 +20,16 @@ class WebSocketClient(object):
         self._queue = Queue.Queue(maxsize=100)  # change queue size from here
         self._time_out = 0
         self._period = None
+        # debug
+        print("Start ws: " + name)
 
     @gen.coroutine
     def start(self):
         with (yield self.__lock.acquire()):
             if self._ws is None:
                 try:
-                    self._ws = yield websocket_connect(self._url, io_loop=self._io_loop)
+                    self._ws = yield websocket_connect(
+                        self._url, io_loop=self._io_loop)
                 except Exception, e:
                     self._time_out += 1
                     if self._time_out >= 10:
@@ -40,7 +43,8 @@ class WebSocketClient(object):
 
     def _period_start(self):
         if self._period is None:
-            self._period = PeriodicCallback(self.start, 1000, io_loop=self._io_loop)
+            self._period = PeriodicCallback(
+                self.start, 1000, io_loop=self._io_loop)
             self._period.start()
 
     @gen.coroutine
@@ -91,7 +95,8 @@ class PeriodicCallback(object):
     def __init__(self, callback, callback_time, io_loop=None):
         self.callback = callback
         if callback_time <= 0:
-            raise ValueError("Periodic callback must have a positive callback_time")
+            raise ValueError(
+                "Periodic callback must have a positive callback_time")
         self.callback_time = callback_time
         self.io_loop = io_loop or IOLoop.current()
         self._running = False
@@ -132,8 +137,9 @@ class PeriodicCallback(object):
 
             if self._next_timeout <= current_time:
                 callback_time_sec = self.callback_time / 1000.0
-                self._next_timeout += (math.floor((current_time - self._next_timeout) /
-                                                  callback_time_sec) + 1) * callback_time_sec
+                self._next_timeout += (math.floor(
+                    (current_time - self._next_timeout) / callback_time_sec) +
+                                       1) * callback_time_sec
 
             self.io_loop.add_callback(self._call_io_loop_thread)
 

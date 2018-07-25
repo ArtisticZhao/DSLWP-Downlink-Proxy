@@ -18,15 +18,13 @@ and tornado server.
 import sys
 import os
 import time
-import threading
 import codecs
-import json
 import datetime
 import xml.dom.minidom as minidom
 import pickle
 import urllib2
 
-from PyQt4 import QtGui, QtCore, Qt
+from PyQt4 import QtGui, QtCore
 # import ui confige
 from ui.proxy_ui import Ui_MainWindow
 from ui.mini_window_ui import Ui_new_server_window
@@ -44,6 +42,7 @@ from core.connection_to_server_socket import SocketSender
 
 # processor
 from process.show_link import link_processor
+from process.send_msg import sender
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -62,6 +61,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # setup processor
         self.show_link = link_processor()
+        self.sender = sender()
 
         # -------------------data-------------
         # server data
@@ -174,8 +174,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.by2hit_logo.clicked.connect(self.show_link.link_by2hit)
         self.ui.hit_logo.clicked.connect(self.show_link.link_hit)
         self.ui.lilacsat_logo.clicked.connect(self.show_link.link_lilac)
-
+        self.ui.send_msg_button.clicked.connect(
+            lambda: self.sender.send_msg(self.ui.send_msg.text()))
         self.ui.server_list.itemDoubleClicked.connect(self.edit_server)
+
         # Initial refresh time for signal
         self.refresh_timer = QtCore.QTimer()
         QtCore.QObject.connect(self.refresh_timer, QtCore.SIGNAL("timeout()"),
@@ -494,11 +496,25 @@ class MainWindow(QtGui.QMainWindow):
             for each in self.ports.get_enabled():
                 if each['protocol'] == 'websocket':
                     # 启动websocket连接
-                    server = self.servers.select_server(each['server'])
-                    url = 'ws://' + server[0] + ':' + str(server[1])
-                    ws = WebSocketClient(url, 'Port' + str(each['port_num']))
-                    self.data_buffer_list[each['port_num']].set_sender(ws)
-                    self.websocket_to_server.append(ws)
+                    server_name = each['server']
+                    server = self.servers.select_server(server_name)
+                    if_new_server = True
+                    connection = None
+                    # 遍历websocket列表，如果存在
+                    for ws in self.websocket_to_server:
+                        if ws.name == server_name:
+                            # 已经存在的服务连接
+                            if_new_server = False
+                            connection = ws
+                            break
+                    if if_new_server:
+                        # 需要新建服务连接
+                        url = 'ws://' + server[0] + ':' + str(server[1])
+                        connection = WebSocketClient(url, server_name)
+                        self.websocket_to_server.append(connection)
+                    # 没一个dataBuf 都需要  sender ，所以有重复的服务器也需要添加sender
+                    self.data_buffer_list[each['port_num']].set_sender(connection)
+                    
 
                 elif each['protocol'] == 'socket':
                     # 启动socket连接
@@ -647,8 +663,8 @@ class MainWindow(QtGui.QMainWindow):
                       datetime.datetime.utcfromtimestamp(
                           float(data['proxy_receive_time'] /
                                 1000)).strftime('%Y-%m-%d %H:%M:%S'))
-                print("Data is: " + log + "\n" + "Data Length is: " +
-                      str(count))
+                print(
+                    "Data is: " + log + "\n" + "Data Length is: " + str(count))
                 self.log_dict[index].flush()
 
     def normal_output_written(self, text):
@@ -685,6 +701,9 @@ class MainWindow(QtGui.QMainWindow):
                 index += 1
             else:
                 self.set_port_status(i, 'disabled')
+
+    def text_send(self):
+        print self.ui.send_msg.text()
 
     def set_port_status(self, index, status):
         """ Set port and server status for user.
