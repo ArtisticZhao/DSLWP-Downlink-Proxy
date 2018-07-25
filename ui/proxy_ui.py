@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created by: PyQt4 UI code generator 4.11.4
+# Created by: PyQt4 UI code generator 4.12.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -232,8 +232,8 @@ class Ui_MainWindow(object):
         self.port_config_label.setWordWrap(False)
         self.port_config_label.setObjectName(_fromUtf8("port_config_label"))
         self.log_text = QtGui.QTextEdit(self.centralWidget)
-        self.log_text.setGeometry(QtCore.QRect(460, 222, 536, 300))
-        self.log_text.setMinimumSize(QtCore.QSize(536, 300))
+        self.log_text.setGeometry(QtCore.QRect(460, 222, 536, 271))
+        self.log_text.setMinimumSize(QtCore.QSize(536, 200))
         self.log_text.setMaximumSize(QtCore.QSize(536, 300))
         self.log_text.setReadOnly(True)
         self.log_text.setObjectName(_fromUtf8("log_text"))
@@ -362,6 +362,12 @@ class Ui_MainWindow(object):
         self.port_list.setObjectName(_fromUtf8("port_list"))
         self.port_list.setColumnCount(0)
         self.port_list.setRowCount(0)
+        self.send_msg = QtGui.QLineEdit(self.centralWidget)
+        self.send_msg.setGeometry(QtCore.QRect(460, 500, 441, 27))
+        self.send_msg.setObjectName(_fromUtf8("send_msg"))
+        self.send_msg_button = QtGui.QPushButton(self.centralWidget)
+        self.send_msg_button.setGeometry(QtCore.QRect(910, 500, 86, 27))
+        self.send_msg_button.setObjectName(_fromUtf8("send_msg_button"))
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtGui.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 1016, 25))
@@ -410,4 +416,5 @@ class Ui_MainWindow(object):
         self.eg_of_server_info.setText(_translate("MainWindow", "e.g.   server_name----->host:port", None))
         self.new_server.setText(_translate("MainWindow", "New", None))
         self.del_server.setText(_translate("MainWindow", "Delete", None))
+        self.send_msg_button.setText(_translate("MainWindow", "Send", None))
 

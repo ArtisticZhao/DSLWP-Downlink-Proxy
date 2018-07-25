@@ -744,13 +744,13 @@
       <x>460</x>
       <y>222</y>
       <width>536</width>
-      <height>300</height>
+      <height>271</height>
      </rect>
     </property>
     <property name="minimumSize">
      <size>
       <width>536</width>
-      <height>300</height>
+      <height>200</height>
      </size>
     </property>
     <property name="maximumSize">
@@ -1214,6 +1214,29 @@ border: none</string>
       <width>536</width>
       <height>171</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="send_msg">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>500</y>
+      <width>441</width>
+      <height>27</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="send_msg_button">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>500</y>
+      <width>86</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Send</string>
     </property>
    </widget>
   </widget>

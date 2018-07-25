@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-
 """Implementation of the proxy for XXXX
 
 `XXXX proxy <url git>`_ allow for tcp protocol
@@ -18,7 +17,6 @@ and tornado server.
 
 import sys
 import os
-import webbrowser
 import time
 import threading
 import codecs
@@ -44,6 +42,9 @@ from core.connection_to_server_websocket import WebSocketClient
 from core.connection_to_server_websocket import Websocket_send_thread
 from core.connection_to_server_socket import SocketSender
 
+# processor
+from process.show_link import link_processor
+
 
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -58,6 +59,9 @@ class MainWindow(QtGui.QMainWindow):
         # setup UI
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        # setup processor
+        self.show_link = link_processor()
 
         # -------------------data-------------
         # server data
@@ -86,10 +90,7 @@ class MainWindow(QtGui.QMainWindow):
         """ This array contains data as follow:
             name  long  alt   lat
         """
-        self.usr_dict = [
-            None, None, None, None
-        ]
-
+        self.usr_dict = [None, None, None, None]
         """ This array contains data as logfile's objects for each port
         """
         self.log_dict = [None, None, None, None, None]
@@ -104,14 +105,13 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.port_list.setColumnCount(6)
         self.ui.port_list.setRowCount(5)
         # 添加表头
-        self.ui.port_list.setHorizontalHeaderLabels(
-            [
-                'GRC Port', '  Satellite  ', 'Channel',
-                'Server', 'Protocol', 'Enable'])
+        self.ui.port_list.setHorizontalHeaderLabels([
+            'GRC Port', '  Satellite  ', 'Channel', 'Server', 'Protocol',
+            'Enable'
+        ])
         # 添加列头
         self.ui.port_list.setVerticalHeaderLabels(
-            [
-                'Port 1', 'Port 2', 'Port 3', 'Port 4', 'Port 5'])
+            ['Port 1', 'Port 2', 'Port 3', 'Port 4', 'Port 5'])
         self.ui.port_list.setSelectionBehavior(
             QtGui.QAbstractItemView.SelectRows)  # 一次选中一行
 
@@ -137,8 +137,8 @@ class MainWindow(QtGui.QMainWindow):
         self.server_port_list = list()
         for each in range(5):
             self.server_port_list.append(QtGui.QComboBox())
-            self.ui.port_list.setCellWidget(
-                each, 3, self.server_port_list[each])
+            self.ui.port_list.setCellWidget(each, 3,
+                                            self.server_port_list[each])
         # 协议选择
         self.protocol_list = list()
         for each in range(5):
@@ -150,8 +150,8 @@ class MainWindow(QtGui.QMainWindow):
         self.enable_port_list = list()
         for each in range(5):
             self.enable_port_list.append(QtGui.QCheckBox())
-            self.ui.port_list.setCellWidget(
-                each, 5, self.enable_port_list[each])
+            self.ui.port_list.setCellWidget(each, 5,
+                                            self.enable_port_list[each])
         self.ui.port_list.resizeColumnsToContents()  # 自动列宽
         self.ui.port_list.resizeRowsToContents()  # 自动行宽
         # 端口状态标签
@@ -170,17 +170,16 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.save_config_button.clicked.connect(self.save_settings)
         self.ui.exit_button.clicked.connect(self.exit)
         self.ui.update_button.clicked.connect(self.update_orbit)
-        self.ui.about_button.clicked.connect(self.popup_about)
-        self.ui.by2hit_logo.clicked.connect(self.link_by2hit)
-        self.ui.hit_logo.clicked.connect(self.link_hit)
-        self.ui.lilacsat_logo.clicked.connect(self.link_lilac)
+        self.ui.about_button.clicked.connect(self.show_link.popup_about)
+        self.ui.by2hit_logo.clicked.connect(self.show_link.link_by2hit)
+        self.ui.hit_logo.clicked.connect(self.show_link.link_hit)
+        self.ui.lilacsat_logo.clicked.connect(self.show_link.link_lilac)
 
         self.ui.server_list.itemDoubleClicked.connect(self.edit_server)
         # Initial refresh time for signal
         self.refresh_timer = QtCore.QTimer()
-        QtCore.QObject.connect(
-            self.refresh_timer, QtCore.SIGNAL("timeout()"),
-            self.on_timer)
+        QtCore.QObject.connect(self.refresh_timer, QtCore.SIGNAL("timeout()"),
+                               self.on_timer)
         self.refresh_timer.start(500)
 
         # Setup console output, emmit stdout
@@ -204,7 +203,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.server_list.takeItem(self.ui.server_list.currentRow())
             # self.servers.del_server(name)
             self.refresh_combo_box()
-    
+
     def edit_server(self):
         text = str(self.ui.server_list.currentItem().text())
         name = text[:text.find('-->')]
@@ -221,14 +220,12 @@ class MainWindow(QtGui.QMainWindow):
         当proxy启动时，刷新数据
         '''
         for i in range(5):
-            self.ports.change_data(
-                i,
-                self.grc_port_list[i].value(),
-                str(self.sat_name_list[i].text()),
-                self.channel_list[i].value(),
-                str(self.server_port_list[i].currentText()),
-                str(self.protocol_list[i].currentText()),
-                self.enable_port_list[i].isChecked())
+            self.ports.change_data(i, self.grc_port_list[i].value(),
+                                   str(self.sat_name_list[i].text()),
+                                   self.channel_list[i].value(),
+                                   str(self.server_port_list[i].currentText()),
+                                   str(self.protocol_list[i].currentText()),
+                                   self.enable_port_list[i].isChecked())
 
     def add_to_list(self, name):
         '''
@@ -263,35 +260,38 @@ class MainWindow(QtGui.QMainWindow):
         """
         try:
             dom = minidom.parse(
-                os.path.split(
-                    os.path.realpath(__file__))[0] + "/settings/settings.xml")
+                os.path.split(os.path.realpath(__file__))[0] +
+                "/settings/settings.xml")
             domroot = dom.documentElement
-            self.ui.name_text.setText(domroot.getElementsByTagName(
-                'nickname')[0].childNodes[0].nodeValue)
-            self.ui.long_text.setText(domroot.getElementsByTagName(
-                'lon')[0].childNodes[0].nodeValue)
-            self.ui.lat_text.setText(domroot.getElementsByTagName(
-                'lat')[0].childNodes[0].nodeValue)
-            self.ui.alt_text.setText(domroot.getElementsByTagName(
-                'alt')[0].childNodes[0].nodeValue)
+            self.ui.name_text.setText(
+                domroot.getElementsByTagName('nickname')[0].childNodes[0]
+                .nodeValue)
+            self.ui.long_text.setText(
+                domroot.getElementsByTagName('lon')[0].childNodes[0].nodeValue)
+            self.ui.lat_text.setText(
+                domroot.getElementsByTagName('lat')[0].childNodes[0].nodeValue)
+            self.ui.alt_text.setText(
+                domroot.getElementsByTagName('alt')[0].childNodes[0].nodeValue)
             self.ui.backup_server_url_text.setText(
-                domroot.getElementsByTagName(
-                    'backup_server_url')[0].childNodes[0].nodeValue)
+                domroot.getElementsByTagName('backup_server_url')[0]
+                .childNodes[0].nodeValue)
             self.ui.backup_enabled.setCheckState(
-                int(domroot.getElementsByTagName(
-                    'back_server_enable')[0].childNodes[0].nodeValue))
-            self.ui.tle_url_text.setText(domroot.getElementsByTagName(
-                'tle_url')[0].childNodes[0].nodeValue)
+                int(
+                    domroot.getElementsByTagName('back_server_enable')[0]
+                    .childNodes[0].nodeValue))
+            self.ui.tle_url_text.setText(
+                domroot.getElementsByTagName('tle_url')[0].childNodes[0]
+                .nodeValue)
             # read the servers settings
-            f = open(os.path.split(
-                os.path.realpath(__file__)
-                )[0] + '/settings/server_settings.dat', 'r')
+            f = open(
+                os.path.split(os.path.realpath(__file__))[0] +
+                '/settings/server_settings.dat', 'r')
             self.servers = pickle.load(f)
             f.close()
             # read the ports settings
-            f = open(os.path.split(
-                os.path.realpath(__file__)
-                )[0] + '/settings/port_settings.dat', 'r')
+            f = open(
+                os.path.split(os.path.realpath(__file__))[0] +
+                '/settings/port_settings.dat', 'r')
             self.ports = pickle.load(f)
             f.close()
             self.reload()
@@ -325,8 +325,8 @@ class MainWindow(QtGui.QMainWindow):
             self.server_port_list[i].setCurrentIndex(index)
         for i in range(5):  # protocol
             item = self.ports.return_data('protocol')[i]
-            index = self.protocol_list[i].findText(
-                item, QtCore.Qt.MatchFixedString)
+            index = self.protocol_list[i].findText(item,
+                                                   QtCore.Qt.MatchFixedString)
             self.protocol_list[i].setCurrentIndex(index)
         for i in range(5):  # enable
             item = self.ports.return_data('enable')[i]
@@ -359,20 +359,20 @@ class MainWindow(QtGui.QMainWindow):
         settings.appendChild(entry)
         # -------- for servers' setting---------
         # save server data
-        f = open(os.path.split(
-            os.path.realpath(__file__))[0] +
+        f = open(
+            os.path.split(os.path.realpath(__file__))[0] +
             '/settings/server_settings.dat', 'w')
         pickle.dump(self.servers, f)
         f.close()
 
         entry = doc.createElement("backup_server_url")
-        entry.appendChild(doc.createTextNode(
-            str(self.ui.backup_server_url_text.text())))
+        entry.appendChild(
+            doc.createTextNode(str(self.ui.backup_server_url_text.text())))
         settings.appendChild(entry)
 
         entry = doc.createElement("back_server_enable")
-        entry.appendChild(doc.createTextNode(
-            str(self.ui.backup_enabled.checkState())))
+        entry.appendChild(
+            doc.createTextNode(str(self.ui.backup_enabled.checkState())))
         settings.appendChild(entry)
 
         entry = doc.createElement("tle_url")
@@ -380,14 +380,14 @@ class MainWindow(QtGui.QMainWindow):
         settings.appendChild(entry)
         # ---------- for server_ports' setting --------
         # save port data
-        f = open(os.path.split(
-            os.path.realpath(__file__))[0] +
-                 '/settings/port_settings.dat', 'w')
+        f = open(
+            os.path.split(os.path.realpath(__file__))[0] +
+            '/settings/port_settings.dat', 'w')
         pickle.dump(self.ports, f)
         f.close()
         # Write Dom Object into file
-        f = open(os.path.split(
-            os.path.realpath(__file__))[0] +
+        f = open(
+            os.path.split(os.path.realpath(__file__))[0] +
             '/settings/settings.xml', 'w')
         f.write(doc.toprettyxml(indent=''))
         f.close()
@@ -418,9 +418,9 @@ class MainWindow(QtGui.QMainWindow):
                 log_dict 是一个文件对象list
             '''
             for index in range(0, 5):
-                self.log_dict[index] = open(os.path.split(
-                    os.path.realpath(__file__))[0]
-                    + "/logs/Port" + str(index + 1) + "DownLink.log", 'a')
+                self.log_dict[index] = open(
+                    os.path.split(os.path.realpath(__file__))[0] + "/logs/Port"
+                    + str(index + 1) + "DownLink.log", 'a')
 
             # Get User Info
             self.usr_dict[0] = str(self.ui.name_text.text())
@@ -458,9 +458,9 @@ class MainWindow(QtGui.QMainWindow):
                         break
                 if not is_exist:
                     self.socket_to_grc_list.append(
-                        LinkToGRC(
-                            [self.data_buffer_list[index], ],
-                            '0.0.0.0', port, index))
+                        LinkToGRC([
+                            self.data_buffer_list[index],
+                        ], '0.0.0.0', port, index))
                 else:
                     # 增加收到的队列
                     for each in self.socket_to_grc_list:
@@ -505,7 +505,8 @@ class MainWindow(QtGui.QMainWindow):
                     server = self.servers.select_server(each['server'])
                     host = server[0]
                     port = server[1]
-                    sk = SocketSender('Port' + str(each['port_num'] + 1), 'socket')
+                    sk = SocketSender('Port' + str(each['port_num'] + 1),
+                                      'socket')
                     sk.create_connection(host, port)
                     sk.start()  # 启动连接
                     self.data_buffer_list[each['port_num']].set_sender(sk)
@@ -516,7 +517,8 @@ class MainWindow(QtGui.QMainWindow):
                     server = self.servers.select_server(each['server'])
                     host = server[0]
                     port = server[1]
-                    sk = SocketSender('Port' + str(each['port_num'] + 1), 'HTY')
+                    sk = SocketSender('Port' + str(each['port_num'] + 1),
+                                      'HTY')
                     sk.create_connection(host, port)
                     sk.start()  # 启动连接
                     self.data_buffer_list[each['port_num']].set_sender(sk)
@@ -600,8 +602,8 @@ class MainWindow(QtGui.QMainWindow):
             tle1 = tle[1]
             tle2 = tle[2]
 
-            with open(os.path.split(
-                    os.path.realpath(__file__))[0] +
+            with open(
+                    os.path.split(os.path.realpath(__file__))[0] +
                     "/grc_param.py", 'w') as fp:
                 fp.write("lat=" + str(self.ui.lat_text.text()) + "\n")
                 fp.write("lon=" + str(self.ui.long_text.text()) + "\n")
@@ -620,34 +622,33 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Log recording
         for index in range(0, 5):
-            if(name.find(str(index + 1)) > -1):
+            if (name.find(str(index + 1)) > -1):
                 self.log_dict[index].write(
                     "Timestamp: " + datetime.datetime.utcfromtimestamp(
-                        float(data['proxy_receive_time']/1000)).strftime(
-                            '%Y-%m-%d %H:%M:%S') + "\n")
+                        float(data['proxy_receive_time'] /
+                              1000)).strftime('%Y-%m-%d %H:%M:%S') + "\n")
                 self.log_dict[index].write(
                     "Nickname: " + self.usr_dict[0].replace("\x00", "") + "\n")
-                self.log_dict[index].write(
-                    "Satname: " + str(data['sat_name']) + "\n")
-                self.log_dict[index].write(
-                    "Longitude: " + str(self.usr_dict[1]) + "\n")
-                self.log_dict[index].write(
-                    "Altitude: " + str(self.usr_dict[2]) + "\n")
-                self.log_dict[index].write(
-                    "Latitiude: " + str(self.usr_dict[3]) + "\n")
+                self.log_dict[index].write("Satname: " +
+                                           str(data['sat_name']) + "\n")
+                self.log_dict[index].write("Longitude: " +
+                                           str(self.usr_dict[1]) + "\n")
+                self.log_dict[index].write("Altitude: " +
+                                           str(self.usr_dict[2]) + "\n")
+                self.log_dict[index].write("Latitiude: " +
+                                           str(self.usr_dict[3]) + "\n")
                 count = 0
                 log = ""
                 for i in codecs.decode(data['raw_data'], 'hex'):
                     log += "%02X" % ord(i) + " "
                     count += 1
                 self.log_dict[index].write("Data: " + log + "\n\n")
-                print(
-                    "[Data] Received time is " +
-                    datetime.datetime.utcfromtimestamp(
-                        float(data['proxy_receive_time']/1000)).strftime(
-                            '%Y-%m-%d %H:%M:%S'))
-                print(
-                    "Data is: " + log + "\n" + "Data Length is: " + str(count))
+                print("[Data] Received time is " +
+                      datetime.datetime.utcfromtimestamp(
+                          float(data['proxy_receive_time'] /
+                                1000)).strftime('%Y-%m-%d %H:%M:%S'))
+                print("Data is: " + log + "\n" + "Data Length is: " +
+                      str(count))
                 self.log_dict[index].flush()
 
     def normal_output_written(self, text):
@@ -659,7 +660,7 @@ class MainWindow(QtGui.QMainWindow):
         length = str_buf.count()
 
         maxLength = 3000
-        if(length > maxLength):
+        if (length > maxLength):
             str_buf.remove(0, length - maxLength)
 
         self.ui.log_text.setText(str_buf)
@@ -701,37 +702,8 @@ class MainWindow(QtGui.QMainWindow):
             self.port_status_list[index].setText("disabled")
             self.port_status_list[index].setStyleSheet("color:grey")
 
-    def link_hit(self):
-        """ Link to hit official website.
-        """
-        webbrowser.open("http://www.hit.edu.cn")
-
-    def link_by2hit(self):
-        """ Link to by2hit official website.
-        """
-        webbrowser.open("http://www.by2hit.net")
-
-    def link_lilac(self):
-        """ Link to lilacsat official website.
-        """
-        webbrowser.open("http://lilacsat.hit.edu.cn")
-
-    def popup_about(self):
-        """ pop up proxy infomation messagebox.
-        """
-        msg = QtGui.QMessageBox()
-        # msg.setStyleSheet("min-width: 128px;min-height: 76px")
-        msg.setText("Mun Downlink Proxy\n\nVersion 1.0\n")
-        myPixmap = QtGui.QPixmap(QtCore.QString.fromUtf8("logo/mun.png"))
-        myScaledPixmap = myPixmap.scaled(msg.size()/2, QtCore.Qt.KeepAspectRatio)
-        msg.setIconPixmap(myScaledPixmap)
-        msg.setInformativeText("This software was made by myrfy, LinerSu and LucyWang.")
-        msg.setWindowTitle("About Mun Downlink Proxy")
-        retval = msg.exec_()
-
 
 class mini_window(QtGui.QWidget):
-
     def __init__(self, data, father_app, current_info, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.data = data
@@ -756,7 +728,6 @@ class mini_window(QtGui.QWidget):
             if self.current_info[2]:
                 self.ui.kiss_decoder_enable.nextCheckState()
 
-
     def create(self):
         name = self.ui.Server_Name.text()
         address = self.ui.URL.text()
@@ -767,16 +738,15 @@ class mini_window(QtGui.QWidget):
             self.father.add_to_list(name)
             self.close()  # shut the window
         else:
-            QtGui.QMessageBox.information(
-                self, "Warning", "Check your input!!!")
+            QtGui.QMessageBox.information(self, "Warning",
+                                          "Check your input!!!")
 
     # 移动到屏幕中心
     def center(self):
         screen = QtGui.QDesktopWidget().screenGeometry()
         size = self.geometry()
-        self.move(
-            (screen.width() - size.width()) / 2,
-            (screen.height() - size.height()) / 2)
+        self.move((screen.width() - size.width()) / 2,
+                  (screen.height() - size.height()) / 2)
 
     def check_vaild(self, name, address, port):
         is_vaild = False
