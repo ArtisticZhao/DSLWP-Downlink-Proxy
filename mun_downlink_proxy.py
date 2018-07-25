@@ -24,7 +24,7 @@ import xml.dom.minidom as minidom
 import pickle
 import urllib2
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore, Qt
 # import ui confige
 from ui.proxy_ui import Ui_MainWindow
 from ui.mini_window_ui import Ui_new_server_window
@@ -48,9 +48,8 @@ from process.send_msg import sender
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        '''
-        为了使用websocket， 先要启动MyThread线程
-        '''
+
+        # 为了使用websocket， 先要启动Websocket_send_thread线程
         # Setup thread for tornado application
         self.thread = Websocket_send_thread()
         self.thread.start()
@@ -64,6 +63,8 @@ class MainWindow(QtGui.QMainWindow):
         self.sender = sender()
 
         # -------------------data-------------
+        # time count, 给 on_timer 使用
+        self.time_count = 0
         # server data
         self.servers = server_data()
         # port data
@@ -408,6 +409,8 @@ class MainWindow(QtGui.QMainWindow):
         Transmission Control Protocol(TCP).
         -Connection between the proxy and server must be websocket.
         """
+        # to get server status
+        self.time_count = 20
         # get port setting data
         self.refresh_port_data()
         # start proxy
@@ -502,7 +505,7 @@ class MainWindow(QtGui.QMainWindow):
                     connection = None
                     # 遍历websocket列表，如果存在
                     for ws in self.websocket_to_server:
-                        if ws.name == server_name:
+                        if ws.get_name() == server_name:
                             # 已经存在的服务连接
                             if_new_server = False
                             connection = ws
@@ -513,8 +516,8 @@ class MainWindow(QtGui.QMainWindow):
                         connection = WebSocketClient(url, server_name)
                         self.websocket_to_server.append(connection)
                     # 没一个dataBuf 都需要  sender ，所以有重复的服务器也需要添加sender
-                    self.data_buffer_list[each['port_num']].set_sender(connection)
-                    
+                    self.data_buffer_list[each['port_num']].set_sender(
+                        connection)
 
                 elif each['protocol'] == 'socket':
                     # 启动socket连接
@@ -539,14 +542,20 @@ class MainWindow(QtGui.QMainWindow):
                     sk.start()  # 启动连接
                     self.data_buffer_list[each['port_num']].set_sender(sk)
                     self.socket_to_server.append(sk)
-
+            # set msg sender
+            # 使用名为 DSLWP 的服务器
+            connection = None
+            for ws in self.websocket_to_server:
+                if ws.get_name() == 'DSLWP':
+                    connection = ws
+                    break
+            self.sender.set_sender(connection)
         else:
             self.stop_proxy()
 
     def stop_proxy(self):
         """ Stop proxy.
         """
-        print('a')
         # TODO 这个还不好使GG
         self.ui.start_proxy_button.setText("Stopping...")
         self.ui.start_proxy_button.setEnabled(False)
@@ -663,8 +672,8 @@ class MainWindow(QtGui.QMainWindow):
                       datetime.datetime.utcfromtimestamp(
                           float(data['proxy_receive_time'] /
                                 1000)).strftime('%Y-%m-%d %H:%M:%S'))
-                print(
-                    "Data is: " + log + "\n" + "Data Length is: " + str(count))
+                print("Data is: " + log + "\n" + "Data Length is: " +
+                      str(count))
                 self.log_dict[index].flush()
 
     def normal_output_written(self, text):
@@ -701,9 +710,24 @@ class MainWindow(QtGui.QMainWindow):
                 index += 1
             else:
                 self.set_port_status(i, 'disabled')
+        if self.time_count == 20:
+            # 10s
+            # 更新服务器信息
+            self.time_count = 0
+            server_names = list()
+            for ws in self.websocket_to_server:
+                server_names.append(ws.get_name())
+            for name in server_names:
+                server = self.servers.select_server(name)
+                # server[0] is server address
+                status = os.system("ping -c 1 " + server[0])
+                # status == 0 is OK!
+                if status == 0:
+                    self.set_server_status(name, 'Connected')
+                else:
+                    self.set_server_status(name, 'Not connected')
 
-    def text_send(self):
-        print self.ui.send_msg.text()
+        self.time_count += 1
 
     def set_port_status(self, index, status):
         """ Set port and server status for user.
@@ -713,13 +737,25 @@ class MainWindow(QtGui.QMainWindow):
         if status == 'Connected':
             self.port_status_list[index].setText("Connected")
             self.port_status_list[index].setStyleSheet("color:green")
-        if status == 'Not connected':
+        elif status == 'Not connected':
             self.port_status_list[index].setText("Not connected")
             self.port_status_list[index].setStyleSheet("color:red")
 
-        if status == 'disabled':
+        elif status == 'disabled':
             self.port_status_list[index].setText("disabled")
             self.port_status_list[index].setStyleSheet("color:grey")
+
+    def set_server_status(self, name, status):
+        # get qlistwightitem with name
+        items = self.ui.server_list.findItems(name, QtCore.Qt.MatchContains)
+        item = items[0]
+        # refresh status
+        if status == 'Connected':
+            item.setBackground(QtGui.QColor('green'))
+            item.setTextColor(QtGui.QColor('white'))
+        elif status == 'Not connected':
+            item.setBackground(QtGui.QColor('red'))
+            item.setTextColor(QtGui.QColor('white'))
 
 
 class mini_window(QtGui.QWidget):

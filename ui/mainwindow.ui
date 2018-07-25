@@ -332,87 +332,11 @@
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QLabel" name="server_label">
-    <property name="geometry">
-     <rect>
-      <x>26</x>
-      <y>436</y>
-      <width>47</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>200</width>
-      <height>200</height>
-     </size>
-    </property>
-    <property name="text">
-     <string>Server:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="server_status">
-    <property name="geometry">
-     <rect>
-      <x>153</x>
-      <y>436</y>
-      <width>101</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>200</width>
-      <height>200</height>
-     </size>
-    </property>
-    <property name="text">
-     <string>Not Connected</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="backup_server_label">
-    <property name="geometry">
-     <rect>
-      <x>26</x>
-      <y>464</y>
-      <width>99</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>200</width>
-      <height>200</height>
-     </size>
-    </property>
-    <property name="text">
-     <string>Backup Server:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="backup_server_status">
-    <property name="geometry">
-     <rect>
-      <x>153</x>
-      <y>464</y>
-      <width>101</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>200</width>
-      <height>200</height>
-     </size>
-    </property>
-    <property name="text">
-     <string>Not Connected</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="port1_label">
     <property name="geometry">
      <rect>
       <x>26</x>
-      <y>492</y>
+      <y>448</y>
       <width>45</width>
       <height>17</height>
      </rect>
@@ -431,7 +355,7 @@
     <property name="geometry">
      <rect>
       <x>153</x>
-      <y>492</y>
+      <y>448</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -450,7 +374,7 @@
     <property name="geometry">
      <rect>
       <x>153</x>
-      <y>520</y>
+      <y>476</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -469,7 +393,7 @@
     <property name="geometry">
      <rect>
       <x>26</x>
-      <y>520</y>
+      <y>476</y>
       <width>45</width>
       <height>17</height>
      </rect>
@@ -488,7 +412,7 @@
     <property name="geometry">
      <rect>
       <x>26</x>
-      <y>548</y>
+      <y>504</y>
       <width>45</width>
       <height>17</height>
      </rect>
@@ -507,7 +431,7 @@
     <property name="geometry">
      <rect>
       <x>153</x>
-      <y>548</y>
+      <y>504</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -526,7 +450,7 @@
     <property name="geometry">
      <rect>
       <x>153</x>
-      <y>576</y>
+      <y>532</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -545,7 +469,7 @@
     <property name="geometry">
      <rect>
       <x>26</x>
-      <y>576</y>
+      <y>532</y>
       <width>45</width>
       <height>17</height>
      </rect>
@@ -564,7 +488,7 @@
     <property name="geometry">
      <rect>
       <x>26</x>
-      <y>604</y>
+      <y>560</y>
       <width>45</width>
       <height>17</height>
      </rect>
@@ -583,7 +507,7 @@
     <property name="geometry">
      <rect>
       <x>153</x>
-      <y>604</y>
+      <y>560</y>
       <width>101</width>
       <height>17</height>
      </rect>

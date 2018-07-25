@@ -23,6 +23,12 @@ class WebSocketClient(object):
         # debug
         print("Start ws: " + name)
 
+    def get_name(self):
+        '''
+        返回websocket连接的名字
+        '''
+        return self._name
+
     @gen.coroutine
     def start(self):
         with (yield self.__lock.acquire()):
