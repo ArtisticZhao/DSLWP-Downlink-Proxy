@@ -549,7 +549,9 @@ class MainWindow(QtGui.QMainWindow):
                 if ws.get_name() == 'DSLWP':
                     connection = ws
                     break
+            self.sender.set_info(self.usr_dict)
             self.sender.set_sender(connection)
+
         else:
             self.stop_proxy()
 
