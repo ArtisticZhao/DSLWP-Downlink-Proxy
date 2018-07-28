@@ -3,7 +3,6 @@ import Queue
 import time
 import codecs
 import json
-import struct
 from core.kiss_decoder import KISS_Decoder
 
 from core.connection_to_server_websocket import WebSocketClient
@@ -14,6 +13,7 @@ class server_data(object):
     @ 这个数据结构用来保持服务器列表，因为设计中要连接到多个服务器
     @ 数据存储： 外部采用服务器名作为key，构成字典， 字典的没一项是个list， 内容为 host，port, kiss_enable
     '''
+
     def __init__(self):
         self.server_dict = dict()
 
@@ -49,12 +49,14 @@ class port_data(object):
         protocol : 协议类型
         enable : 是否启动
     '''
+
     def __init__(self):
         self.port_data = list()
         for each in range(5):
             self.port_data.append('')
 
-    def change_data(self, port_num, port, satellite, channel, server, protocol, enable):
+    def change_data(self, port_num, port, satellite, channel, server, protocol,
+                    enable):
         '''
         @ 输入：
             见class头的说明
@@ -95,6 +97,7 @@ class DataBuf(object):
     @ enable_kiss_decode : 如果GRC的数据采用了Kiss， 则在加入队列之前进行解码
     @ self.sender : 发送的下行服务器
     '''
+
     def __init__(self, Name):
         self.name = Name
         self.data_buff = Queue.Queue()  # 队列中存储http_data
@@ -122,7 +125,7 @@ class DataBuf(object):
         @ 输入 sender 应该是一个websocket 或 socket 对象， 应有 .send(data)函数
         '''
         self.sender = sender
-    
+
     def set_logger(self, logger):
         self.logger = logger
 
@@ -160,5 +163,5 @@ class DataBuf(object):
         self.http_data = dict()
         self.http_data = self.info
         self.http_data['raw_data'] = codecs.encode(data, 'hex')
-        self.http_data['proxy_receive_time'] = int(time.time()*1000)
+        self.http_data['proxy_receive_time'] = int(time.time() * 1000)
         # self.http_data = json.dumps(self.http_data)

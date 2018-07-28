@@ -178,7 +178,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.send_msg_button.clicked.connect(
             lambda: self.sender.send_msg(self.ui.send_msg.text()))
         self.ui.server_list.itemDoubleClicked.connect(self.edit_server)
-
+        self.ui.set_time.clicked.connect(self.set_time)
         # Initial refresh time for signal
         self.refresh_timer = QtCore.QTimer()
         QtCore.QObject.connect(self.refresh_timer, QtCore.SIGNAL("timeout()"),
@@ -491,6 +491,7 @@ class MainWindow(QtGui.QMainWindow):
                 }
                 self.data_buffer_list[each['port_num']].set_info(http_data)
 
+
             # 启动GRC 接收线程
             for sock in self.socket_to_grc_list:
                 sock.start()
@@ -550,6 +551,7 @@ class MainWindow(QtGui.QMainWindow):
                     connection = ws
                     break
             self.sender.set_info(self.usr_dict)
+            self.sender.set_time_obj(self.ui.send_msg_time)
             self.sender.set_sender(connection)
 
         else:
@@ -674,8 +676,8 @@ class MainWindow(QtGui.QMainWindow):
                       datetime.datetime.utcfromtimestamp(
                           float(data['proxy_receive_time'] /
                                 1000)).strftime('%Y-%m-%d %H:%M:%S'))
-                print("Data is: " + log + "\n" + "Data Length is: " +
-                      str(count))
+                print(
+                    "Data is: " + log + "\n" + "Data Length is: " + str(count))
                 self.log_dict[index].flush()
 
     def normal_output_written(self, text):
@@ -759,6 +761,16 @@ class MainWindow(QtGui.QMainWindow):
             item.setBackground(QtGui.QColor('red'))
             item.setTextColor(QtGui.QColor('white'))
 
+    def set_time(self):
+        now_time = QtCore.QDateTime.currentDateTime()
+        now_time = now_time.toUTC()
+        self.ui.send_msg_time.setDateTime(now_time)
+        py_time = self.ui.send_msg_time.dateTime()
+        py_time = py_time.toPyDateTime()
+        py_time = time.mktime(
+                    py_time.timetuple()) + py_time.microsecond / 1E6
+        print py_time
+        
 
 class mini_window(QtGui.QWidget):
     def __init__(self, data, father_app, current_info, parent=None):

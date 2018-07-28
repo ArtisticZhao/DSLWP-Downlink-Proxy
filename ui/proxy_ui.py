@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'mainwindow.ui'
+# Form implementation generated from reading ui file 'ui/mainwindow.ui'
 #
 # Created by: PyQt4 UI code generator 4.12.1
 #
@@ -216,7 +216,7 @@ class Ui_MainWindow(object):
         self.port_config_label.setWordWrap(False)
         self.port_config_label.setObjectName(_fromUtf8("port_config_label"))
         self.log_text = QtGui.QTextEdit(self.centralWidget)
-        self.log_text.setGeometry(QtCore.QRect(460, 222, 536, 271))
+        self.log_text.setGeometry(QtCore.QRect(460, 222, 536, 241))
         self.log_text.setMinimumSize(QtCore.QSize(536, 200))
         self.log_text.setMaximumSize(QtCore.QSize(536, 300))
         self.log_text.setReadOnly(True)
@@ -347,11 +347,19 @@ class Ui_MainWindow(object):
         self.port_list.setColumnCount(0)
         self.port_list.setRowCount(0)
         self.send_msg = QtGui.QLineEdit(self.centralWidget)
-        self.send_msg.setGeometry(QtCore.QRect(460, 500, 441, 27))
+        self.send_msg.setGeometry(QtCore.QRect(460, 470, 536, 27))
         self.send_msg.setObjectName(_fromUtf8("send_msg"))
         self.send_msg_button = QtGui.QPushButton(self.centralWidget)
-        self.send_msg_button.setGeometry(QtCore.QRect(910, 500, 86, 27))
+        self.send_msg_button.setGeometry(QtCore.QRect(940, 500, 61, 27))
         self.send_msg_button.setObjectName(_fromUtf8("send_msg_button"))
+        self.send_msg_time = QtGui.QDateTimeEdit(self.centralWidget)
+        self.send_msg_time.setGeometry(QtCore.QRect(690, 500, 171, 27))
+        self.send_msg_time.setCalendarPopup(True)
+        self.send_msg_time.setTimeSpec(QtCore.Qt.UTC)
+        self.send_msg_time.setObjectName(_fromUtf8("send_msg_time"))
+        self.set_time = QtGui.QPushButton(self.centralWidget)
+        self.set_time.setGeometry(QtCore.QRect(870, 500, 61, 27))
+        self.set_time.setObjectName(_fromUtf8("set_time"))
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtGui.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 1016, 25))
@@ -397,4 +405,6 @@ class Ui_MainWindow(object):
         self.new_server.setText(_translate("MainWindow", "New", None))
         self.del_server.setText(_translate("MainWindow", "Delete", None))
         self.send_msg_button.setText(_translate("MainWindow", "Send", None))
+        self.send_msg_time.setDisplayFormat(_translate("MainWindow", "yyyy-MM-dd hh:mm:ss", None))
+        self.set_time.setText(_translate("MainWindow", "Time", None))
 
