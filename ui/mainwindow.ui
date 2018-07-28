@@ -1143,9 +1143,9 @@ border: none</string>
    <widget class="QLineEdit" name="send_msg">
     <property name="geometry">
      <rect>
-      <x>460</x>
+      <x>570</x>
       <y>470</y>
-      <width>536</width>
+      <width>431</width>
       <height>27</height>
      </rect>
     </property>
@@ -1168,12 +1168,12 @@ border: none</string>
      <rect>
       <x>690</x>
       <y>500</y>
-      <width>171</width>
+      <width>141</width>
       <height>27</height>
      </rect>
     </property>
     <property name="displayFormat">
-     <string>yyyy-MM-dd hh:mm:ss</string>
+     <string>yyyy-MM-dd hh:mm</string>
     </property>
     <property name="calendarPopup">
      <bool>false</bool>
@@ -1185,27 +1185,53 @@ border: none</string>
    <widget class="QPushButton" name="set_time">
     <property name="geometry">
      <rect>
-      <x>870</x>
+      <x>836</x>
       <y>500</y>
-      <width>61</width>
+      <width>101</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>Time</string>
+     <string>Current Time</string>
     </property>
    </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>640</x>
+      <x>460</x>
       <y>500</y>
+      <width>221</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Receive time (UTC yyyy/mm/dd):</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>600</y>
       <width>41</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
      <string>UTC:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>470</y>
+      <width>101</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>JT4G message:</string>
     </property>
    </widget>
   </widget>

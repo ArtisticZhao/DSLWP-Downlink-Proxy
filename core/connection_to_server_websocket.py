@@ -20,8 +20,6 @@ class WebSocketClient(object):
         self._queue = Queue.Queue(maxsize=100)  # change queue size from here
         self._time_out = 0
         self._period = None
-        # debug
-        print("Start ws: " + name)
 
     def get_name(self):
         '''
@@ -66,7 +64,7 @@ class WebSocketClient(object):
                 print message['message']
 
     def on_connected(self):
-        while self._queue.empty() == False:
+        while self._queue.empty() is False:
             self._ws.write_message(self._queue.get())
 
     def _close(self):
@@ -89,12 +87,13 @@ class WebSocketClient(object):
             self._queue.put(data)
 
     def is_alive(self):
-        return self._ws != None
+        return self._ws is not None
 
     def stop(self):
         self._close()
         if self._period and self._period.is_running():
             self._period.stop()
+        print(" [Websocket] " + self._name + " stopped")
 
 
 class PeriodicCallback(object):

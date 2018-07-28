@@ -23,6 +23,7 @@ import datetime
 import xml.dom.minidom as minidom
 import pickle
 import urllib2
+import requests
 
 from PyQt4 import QtGui, QtCore, Qt
 # import ui confige
@@ -491,7 +492,6 @@ class MainWindow(QtGui.QMainWindow):
                 }
                 self.data_buffer_list[each['port_num']].set_info(http_data)
 
-
             # 启动GRC 接收线程
             for sock in self.socket_to_grc_list:
                 sock.start()
@@ -714,7 +714,13 @@ class MainWindow(QtGui.QMainWindow):
                 index += 1
             else:
                 self.set_port_status(i, 'disabled')
-        if self.time_count == 20:
+        if self.proxy_running is False:
+            server_names = list()
+            for ws in self.websocket_to_server:
+                server_names.append(ws.get_name())
+            for name in server_names:
+                self.set_server_status(name, 'Disable')
+        elif self.time_count == 20:
             # 10s
             # 更新服务器信息
             self.time_count = 0
@@ -724,7 +730,10 @@ class MainWindow(QtGui.QMainWindow):
             for name in server_names:
                 server = self.servers.select_server(name)
                 # server[0] is server address
-                status = os.system("ping -c 1 " + server[0])
+                url = "http://" + server[0] + ':' + str(server[1])
+                response = requests.get(url=url)
+                if response.text == 'Can "Upgrade" only to "WebSocket".':
+                    status = 0
                 # status == 0 is OK!
                 if status == 0:
                     self.set_server_status(name, 'Connected')
@@ -760,17 +769,15 @@ class MainWindow(QtGui.QMainWindow):
         elif status == 'Not connected':
             item.setBackground(QtGui.QColor('red'))
             item.setTextColor(QtGui.QColor('white'))
+        elif status == 'Disable':
+            item.setBackground(QtGui.QColor('white'))
+            item.setTextColor(QtGui.QColor('black'))
 
     def set_time(self):
         now_time = QtCore.QDateTime.currentDateTime()
         now_time = now_time.toUTC()
         self.ui.send_msg_time.setDateTime(now_time)
-        py_time = self.ui.send_msg_time.dateTime()
-        py_time = py_time.toPyDateTime()
-        py_time = time.mktime(
-                    py_time.timetuple()) + py_time.microsecond / 1E6
-        print py_time
-        
+
 
 class mini_window(QtGui.QWidget):
     def __init__(self, data, father_app, current_info, parent=None):
