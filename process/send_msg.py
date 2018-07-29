@@ -2,9 +2,9 @@
 '''
 发送业务逻辑
 '''
-import time
 import json
 import codecs
+import calendar
 
 
 class sender(object):
@@ -38,10 +38,9 @@ class sender(object):
             if len(msg) != 0:
                 msg = unicode(msg)  # Qstring to string
                 py_time = self.time_obj.dateTime().toPyDateTime()
-                py_time = time.mktime(
-                    py_time.timetuple()) + py_time.microsecond / 1E6
+                py_time = utc_datetime_to_timestamp(py_time)
                 # 使用输入框输入的时间
-                self.http_data['proxy_receive_time'] = int(py_time * 1000)
+                self.http_data['proxy_receive_time'] = int(py_time)
                 self.http_data['raw_data'] = codecs.encode(msg, 'hex')
                 send_data = json.dumps(self.http_data)  # 转json
                 print self.http_data  # debug
@@ -50,3 +49,14 @@ class sender(object):
                 print "please input something"
         else:
             print "[Error] msg sender is not set!"
+
+
+def utc_datetime_to_timestamp(utc_datetime):
+    """将 utc 时间 (datetime 格式) 转为 utc 时间戳
+    :param utc_datetime: {datetime}2016-02-25 20:21:04.242000
+    :return: 13位 的毫秒时间戳 1456431664242
+    """
+    utc_timestamp = long(
+        calendar.timegm(utc_datetime.timetuple()) * 1000.0 +
+        utc_datetime.microsecond / 1000.0)
+    return utc_timestamp

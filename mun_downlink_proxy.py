@@ -25,7 +25,7 @@ import pickle
 import urllib2
 import requests
 
-from PyQt4 import QtGui, QtCore, Qt
+from PyQt4 import QtGui, QtCore
 # import ui confige
 from ui.proxy_ui import Ui_MainWindow
 from ui.mini_window_ui import Ui_new_server_window
