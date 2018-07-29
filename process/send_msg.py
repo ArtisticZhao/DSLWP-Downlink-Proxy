@@ -31,7 +31,7 @@ class sender(object):
 
     def send_msg(self, msg):
         if self.http_data is None:
-            print "please input info"
+            print "please start proxy"
         elif self.time_obj is None:
             print "please set time object"
         elif self.sender is not None:
