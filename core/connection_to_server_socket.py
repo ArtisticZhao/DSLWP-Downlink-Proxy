@@ -3,14 +3,14 @@
 使用Socket连接服务器
 '''
 import threading
-import Queue
+import queue
 import time
 import select
 import socket
 import codecs
 import struct
 
-from temp_to_add_header import add_HTY_header
+from core.temp_to_add_header import add_HTY_header
 
 class SocketSender(threading.Thread):
     '''
@@ -24,7 +24,7 @@ class SocketSender(threading.Thread):
         self.thread_stop = False
         self.MyName = MyName
         self.Protocol = Protocol
-        self.SendQueue = Queue.Queue()
+        self.SendQueue = queue.Queue()
         self.ReSendBuf = None
         self.is_connected = False
 

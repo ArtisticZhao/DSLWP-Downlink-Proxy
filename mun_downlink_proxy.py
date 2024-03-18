@@ -22,10 +22,12 @@ import codecs
 import datetime
 import xml.dom.minidom as minidom
 import pickle
-import urllib2
-import requests
+# import urllib2
+# import requests
 
-from PyQt4 import QtGui, QtCore
+import PyQt5
+from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtWidgets as QtGui
 # import ui confige
 from ui.proxy_ui import Ui_MainWindow
 from ui.mini_window_ui import Ui_new_server_window
@@ -46,9 +48,9 @@ from process.show_link import link_processor
 from process.send_msg import sender
 
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(MainWindow, self).__init__()
 
         # 为了使用websocket， 先要启动Websocket_send_thread线程
         # Setup thread for tornado application
@@ -99,9 +101,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # --------------confige------------------------------
         # 输入控制, 经度纬度海拔只能是浮点型.
-        self.ui.lat_text.setValidator(QtGui.QDoubleValidator())
-        self.ui.long_text.setValidator(QtGui.QDoubleValidator())
-        self.ui.alt_text.setValidator(QtGui.QDoubleValidator())
+        self.ui.lat_text.setValidator(PyQt5.QtGui.QDoubleValidator())
+        self.ui.long_text.setValidator(PyQt5.QtGui.QDoubleValidator())
+        self.ui.alt_text.setValidator(PyQt5.QtGui.QDoubleValidator())
 
         # --------------端口列表----------------
         self.ui.port_list.setColumnCount(6)
@@ -182,8 +184,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.set_time.clicked.connect(self.set_time)
         # Initial refresh time for signal
         self.refresh_timer = QtCore.QTimer()
-        QtCore.QObject.connect(self.refresh_timer, QtCore.SIGNAL("timeout()"),
-                               self.on_timer)
+        self.refresh_timer.timeout.connect(self.on_timer)
         self.refresh_timer.start(500)
 
         # Setup console output, emmit stdout
@@ -686,7 +687,7 @@ class MainWindow(QtGui.QMainWindow):
         # Append text to the QTextEdit.
         str_buf = self.ui.log_text.toPlainText()
         str_buf = str_buf + text
-        length = str_buf.count()
+        length = len(str_buf)
 
         maxLength = 3000
         if (length > maxLength):
@@ -695,7 +696,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.log_text.setText(str_buf)
         textCursor = self.ui.log_text.textCursor()
         self.ui.log_text.setText(str_buf)
-        textCursor.setPosition(str_buf.count())
+        textCursor.setPosition(len(str_buf))
         self.ui.log_text.setTextCursor(textCursor)
 
     def on_timer(self):
@@ -779,9 +780,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.send_msg_time.setDateTime(now_time)
 
 
-class mini_window(QtGui.QWidget):
+class mini_window(QtWidgets.QWidget):
     def __init__(self, data, father_app, current_info, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(mini_window, self).__init__()
         self.data = data
         self.current_info = current_info
         self.father = father_app
@@ -849,7 +850,7 @@ class EmittingStream(QtCore.QObject):
 
 
 if __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     myapp = MainWindow()
     myapp.show()
     sys.exit(app.exec_())

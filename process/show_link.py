@@ -3,7 +3,7 @@
 用于处理proxy底部链接显示
 '''
 import webbrowser
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore
 
 
 class link_processor(object):

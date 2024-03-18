@@ -1,6 +1,6 @@
 # coding:utf-8
 
-import Queue
+import queue
 import math
 import tornado
 import threading
@@ -17,7 +17,7 @@ class WebSocketClient(object):
         self._ws = None
         self.__lock = locks.Lock()
         self._io_loop = tornado.ioloop.IOLoop.current()
-        self._queue = Queue.Queue(maxsize=100)  # change queue size from here
+        self._queue = queue.Queue(maxsize=100)  # change queue size from here
         self._time_out = 0
         self._period = None
 
@@ -34,7 +34,7 @@ class WebSocketClient(object):
                 try:
                     self._ws = yield websocket_connect(
                         self._url, io_loop=self._io_loop)
-                except Exception, e:
+                except Exception as e:
                     self._time_out += 1
                     if self._time_out >= 10:
                         self._period.change_callback_time(10000)
@@ -56,12 +56,12 @@ class WebSocketClient(object):
         while True:
             msg = yield self._ws.read_message()
             if msg is None:
-                print "[WebSocket] " + self._name + " socket connection closed"
+                print("[WebSocket] " + self._name + " socket connection closed")
                 self._close()
                 break
             else:
                 message = json.loads(msg)
-                print message['message']
+                print(message['message'])
 
     def on_connected(self):
         while self._queue.empty() is False:
@@ -82,7 +82,7 @@ class WebSocketClient(object):
         if not self._queue.full():
             self._queue.put(data)
         else:
-            print "[Queue] Websocket queue received maximum, throw away old data"
+            print("[Queue] Websocket queue received maximum, throw away old data")
             self._queue.get()
             self._queue.put(data)
 

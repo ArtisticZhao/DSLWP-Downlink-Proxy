@@ -31,9 +31,9 @@ class sender(object):
 
     def send_msg(self, msg):
         if self.http_data is None:
-            print "please start proxy"
+            print("please start proxy")
         elif self.time_obj is None:
-            print "please set time object"
+            print("please set time object")
         elif self.sender is not None:
             if len(msg) != 0:
                 msg = unicode(msg)  # Qstring to string
@@ -43,12 +43,12 @@ class sender(object):
                 self.http_data['proxy_receive_time'] = int(py_time)
                 self.http_data['raw_data'] = codecs.encode(msg, 'hex')
                 send_data = json.dumps(self.http_data)  # 转json
-                print self.http_data  # debug
+                print(self.http_data)  # debug
                 self.sender.SendData(send_data)
             else:
-                print "please input something"
+                print("please input something")
         else:
-            print "[Error] msg sender is not set!"
+            print("[Error] msg sender is not set!")
 
 
 def utc_datetime_to_timestamp(utc_datetime):
