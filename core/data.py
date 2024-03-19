@@ -5,7 +5,7 @@ import codecs
 import json
 from core.kiss_decoder import KISS_Decoder
 
-from core.connection_to_server_websocket import WebSocketClient
+from core.connection_to_server_websocket_3 import WebSocketClient
 
 
 class server_data(object):

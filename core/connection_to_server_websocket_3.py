@@ -70,7 +70,9 @@ class WebSocketClient(object):
                 break
     def on_connected(self):
         while self._queue.empty() is False:
-            self._ws.send(self._queue.get())
+            msg = self._queue.get()
+            self._ws.send(msg)
+            # self._close()
 
 
     def _close(self):

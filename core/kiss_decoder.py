@@ -50,5 +50,5 @@ class KISS_Decoder():
                 self.InEscMode = False
 
     def reset_kiss(self):
-        self.DataBuf = ""
+        self.DataBuf = b""
         self.DecodedLength = 0

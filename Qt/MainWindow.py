@@ -43,8 +43,8 @@ from core.data import port_data
 from core.data import DataBuf
 # connector
 from core.connection_to_grc import LinkToGRC
-from core.connection_to_server_websocket import WebSocketClient
-from core.connection_to_server_websocket import Websocket_send_thread
+from core.connection_to_server_websocket_3 import WebSocketClient
+from core.connection_to_server_websocket_3 import Websocket_send_thread
 from core.connection_to_server_socket import SocketSender
 
 # processor
@@ -58,8 +58,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # 为了使用websocket， 先要启动Websocket_send_thread线程
         # Setup thread for tornado application
-        self.thread = Websocket_send_thread()
-        self.thread.start()
+        self.thread = []
 
         # setup UI
         self.ui = Ui_MainWindow()
@@ -530,6 +529,9 @@ class MainWindow(QtWidgets.QMainWindow):
                         url = 'ws://' + server[0] + ':' + str(server[1])
                         connection = WebSocketClient(url, server_name)
                         self.websocket_to_server.append(connection)
+                        t = Websocket_send_thread(connection)
+                        self.thread.append(t)
+                        t.start()
                     # 没一个dataBuf 都需要  sender ，所以有重复的服务器也需要添加sender
                     self.data_buffer_list[each['port_num']].set_sender(
                         connection)
@@ -619,7 +621,9 @@ class MainWindow(QtWidgets.QMainWindow):
             ret = msgBox.exec_()
             self.proxy_running = False
             self.stop_proxy()
-            self.thread.join()
+            for each in self.thread:
+                each.stop()
+                each.join()
             # self.close()
         if not ignore:
             self.close()
