@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 """Implementation of the proxy for XXXX
 
@@ -23,14 +23,18 @@ import datetime
 import xml.dom.minidom as minidom
 import pickle
 # import urllib2
-# import requests
+import requests
 
 import PyQt5
 from PyQt5 import QtCore, QtWidgets
 from PyQt5 import QtWidgets as QtGui
+from PyQt5.QtCore import QCoreApplication
+
+from Qt.MiniWindow import MiniWindow
+from Qt.Settings import Settings
 # import ui confige
 from ui.proxy_ui import Ui_MainWindow
-from ui.mini_window_ui import Ui_new_server_window
+
 from xml.dom.minidom import Document
 
 # confige data
@@ -195,7 +199,7 @@ class MainWindow(QtWidgets.QMainWindow):
     # ------------ 召唤出小窗按钮函数 ------------
     def new_server(self):
         # 输入小窗
-        self.new_server_window = mini_window(self.servers, self, None)
+        self.new_server_window = MiniWindow(self.servers, self, None)
         self.new_server_window.show()
 
     def del_server(self):
@@ -216,7 +220,7 @@ class MainWindow(QtWidgets.QMainWindow):
         server.append(name)
         self.servers.del_server(name)
         self.ui.server_list.takeItem(self.ui.server_list.currentRow())
-        self.new_server_window = mini_window(self.servers, self, server)
+        self.new_server_window = MiniWindow(self.servers, self, server)
         self.new_server_window.show()
 
     #  ------------更新数据--------------
@@ -264,9 +268,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 an error occured accessing configuration file or tag name
         """
         try:
-            dom = minidom.parse(
-                os.path.split(os.path.realpath(__file__))[0] +
-                "/settings/settings.xml")
+            setting_path = os.path.split(os.path.realpath(__file__))[0] + "/../settings/settings.xml"
+            if not os.path.exists(setting_path):
+                print("No setting file found!")
+                return
+            dom = minidom.parse(setting_path)
             domroot = dom.documentElement
             self.ui.name_text.setText(
                 domroot.getElementsByTagName('nickname')[0].childNodes[0]
@@ -290,13 +296,13 @@ class MainWindow(QtWidgets.QMainWindow):
             # read the servers settings
             f = open(
                 os.path.split(os.path.realpath(__file__))[0] +
-                '/settings/server_settings.dat', 'r')
+                '/../settings/server_settings.dat', 'rb')
             self.servers = pickle.load(f)
             f.close()
             # read the ports settings
             f = open(
                 os.path.split(os.path.realpath(__file__))[0] +
-                '/settings/port_settings.dat', 'r')
+                '/../settings/port_settings.dat', 'rb')
             self.ports = pickle.load(f)
             f.close()
             self.reload()
@@ -342,6 +348,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """ Save Configuration to document.
         """
         self.refresh_port_data()  # 刷新ports输入的数据
+
         doc = Document()  # Create Dom Object
 
         settings = doc.createElement('settings')  # Create Root Element
@@ -366,7 +373,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # save server data
         f = open(
             os.path.split(os.path.realpath(__file__))[0] +
-            '/settings/server_settings.dat', 'w')
+            '/../settings/server_settings.dat', 'wb')
         pickle.dump(self.servers, f)
         f.close()
 
@@ -387,13 +394,13 @@ class MainWindow(QtWidgets.QMainWindow):
         # save port data
         f = open(
             os.path.split(os.path.realpath(__file__))[0] +
-            '/settings/port_settings.dat', 'w')
+            '/../settings/port_settings.dat', 'wb')
         pickle.dump(self.ports, f)
         f.close()
         # Write Dom Object into file
         f = open(
             os.path.split(os.path.realpath(__file__))[0] +
-            '/settings/settings.xml', 'w')
+            '/../settings/settings.xml', 'w')
         f.write(doc.toprettyxml(indent=''))
         f.close()
         print("[File] Configuration saved successfully.")
@@ -426,14 +433,20 @@ class MainWindow(QtWidgets.QMainWindow):
             '''
             for index in range(0, 5):
                 self.log_dict[index] = open(
-                    os.path.split(os.path.realpath(__file__))[0] + "/logs/Port"
+                    os.path.split(os.path.realpath(__file__))[0] + "/../logs/Port"
                     + str(index + 1) + "DownLink.log", 'a')
 
             # Get User Info
-            self.usr_dict[0] = str(self.ui.name_text.text())
-            self.usr_dict[1] = float(self.ui.long_text.text())
-            self.usr_dict[2] = float(self.ui.alt_text.text())
-            self.usr_dict[3] = float(self.ui.lat_text.text())
+            try:
+                self.usr_dict[0] = str(self.ui.name_text.text())
+                self.usr_dict[1] = float(self.ui.long_text.text())
+                self.usr_dict[2] = float(self.ui.alt_text.text())
+                self.usr_dict[3] = float(self.ui.lat_text.text())
+            except ValueError:
+                self.usr_dict[0] = ''
+                self.usr_dict[1] = 0.0
+                self.usr_dict[2] = 0.0
+                self.usr_dict[3] = 0.0
 
             # Get backup Server Info
             self.host_back = str(self.ui.backup_server_url_text.text())
@@ -571,7 +584,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # wait for closing
         for sock in self.socket_to_grc_list:
-            while sock.isAlive():
+            while sock.is_alive():
                 time.sleep(0.2)
         # remove proxy obj
         self.socket_to_grc_list = list()
@@ -591,7 +604,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.start_proxy_button.setText("Start Proxy")
         self.ui.start_proxy_button.setEnabled(True)
 
-    def exit(self):
+    def exit(self, ignore):
         """ Exit proxy by exit button.
 
         Stop all connections before exit, including multithreading
@@ -607,16 +620,18 @@ class MainWindow(QtWidgets.QMainWindow):
             self.proxy_running = False
             self.stop_proxy()
             self.thread.join()
+            # self.close()
+        if not ignore:
             self.close()
-        self.close()
 
     def closeEvent(self, event):
         """ Exit proxy by title bar exit.
 
         Same feature as exit() function.
         """
-        self.exit()
-        event.accept()
+        self.exit(True)
+        QCoreApplication.instance().quit()
+
 
     def update_orbit(self):
         """ Update orbit for proxy
@@ -670,7 +685,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 count = 0
                 log = ""
                 for i in codecs.decode(data['raw_data'], 'hex'):
-                    log += "%02X" % ord(i) + " "
+                    log += format(i, '02X') + " "
                     count += 1
                 self.log_dict[index].write("Data: " + log + "\n\n")
                 print("[Data] Received time is " +
@@ -689,9 +704,9 @@ class MainWindow(QtWidgets.QMainWindow):
         str_buf = str_buf + text
         length = len(str_buf)
 
-        maxLength = 3000
+        maxLength = 30000
         if (length > maxLength):
-            str_buf.remove(0, length - maxLength)
+            str_buf = str_buf[maxLength:]
 
         self.ui.log_text.setText(str_buf)
         textCursor = self.ui.log_text.textCursor()
@@ -702,6 +717,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_timer(self):
         """ Set up timer to refresh time.
         """
+        status = -1
         enabled_list = list()
         for each in self.socket_to_grc_list:
             enabled_list.append(each.get_index())
@@ -765,81 +781,19 @@ class MainWindow(QtWidgets.QMainWindow):
         item = items[0]
         # refresh status
         if status == 'Connected':
-            item.setBackground(QtGui.QColor('green'))
-            item.setTextColor(QtGui.QColor('white'))
+            item.setBackground(PyQt5.QtGui.QColor('green'))
+            item.setForeground(PyQt5.QtGui.QColor('white'))
         elif status == 'Not connected':
-            item.setBackground(QtGui.QColor('red'))
-            item.setTextColor(QtGui.QColor('white'))
+            item.setBackground(PyQt5.QtGui.QColor('red'))
+            item.setForeground(PyQt5.QtGui.QColor('white'))
         elif status == 'Disable':
-            item.setBackground(QtGui.QColor('white'))
-            item.setTextColor(QtGui.QColor('black'))
+            item.setBackground(PyQt5.QtGui.QColor('white'))
+            item.setForeground(PyQt5.QtGui.QColor('black'))
 
     def set_time(self):
         now_time = QtCore.QDateTime.currentDateTime()
         now_time = now_time.toUTC()
         self.ui.send_msg_time.setDateTime(now_time)
-
-
-class mini_window(QtWidgets.QWidget):
-    def __init__(self, data, father_app, current_info, parent=None):
-        super(mini_window, self).__init__()
-        self.data = data
-        self.current_info = current_info
-        self.father = father_app
-        self.ui = Ui_new_server_window()
-        self.ui.setupUi(self)
-        self.ui.port.setValidator(QtGui.QIntValidator())
-        self.change_info()
-        self.center()
-        self.ui.close.clicked.connect(self.close)
-        self.ui.create_server.clicked.connect(self.create)
-
-    def change_info(self):
-        '''
-        用于更新窗口默认的信息栏
-        '''
-        if self.current_info is not None:
-            self.ui.Server_Name.setText(self.current_info[3])
-            self.ui.URL.setText(self.current_info[0])
-            self.ui.port.setText(str(self.current_info[1]))
-            if self.current_info[2]:
-                self.ui.kiss_decoder_enable.nextCheckState()
-
-    def create(self):
-        name = self.ui.Server_Name.text()
-        address = self.ui.URL.text()
-        port = self.ui.port.text()
-        kiss_enable = self.ui.kiss_decoder_enable.isChecked()
-        if self.check_vaild(name, address, port):
-            self.data.create(str(name), str(address), int(port), kiss_enable)
-            self.father.add_to_list(name)
-            self.close()  # shut the window
-        else:
-            QtGui.QMessageBox.information(self, "Warning",
-                                          "Check your input!!!")
-
-    # 移动到屏幕中心
-    def center(self):
-        screen = QtGui.QDesktopWidget().screenGeometry()
-        size = self.geometry()
-        self.move((screen.width() - size.width()) / 2,
-                  (screen.height() - size.height()) / 2)
-
-    def check_vaild(self, name, address, port):
-        is_vaild = False
-        if port != '':
-            port = int(port)
-            name = str(name)
-            address = str(address)
-            if port >= 1000 and port <= 65535:
-                if name != '' and address != '':
-                    is_vaild = True
-        # 检查是否重复的服务器名字
-        if name in self.data.show_all_names():
-            QtGui.QMessageBox.information(
-                self, "Warning", "The server name must be different !")
-            is_vaild = False
-        return is_vaild
 
 
 class EmittingStream(QtCore.QObject):
@@ -849,8 +803,3 @@ class EmittingStream(QtCore.QObject):
         self.textWritten.emit(str(text))
 
 
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    myapp = MainWindow()
-    myapp.show()
-    sys.exit(app.exec_())

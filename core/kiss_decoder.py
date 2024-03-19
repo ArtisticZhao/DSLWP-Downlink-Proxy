@@ -5,10 +5,10 @@ KISS 协议 数据包以C0开头 ，以C0结尾
 当数据中有C0时， 以 DB DC替换
 当数据中有DB时， 以 DB DD替换
 '''
-KISS_FEND = '\xC0'
-KISS_FESC = '\xDB'
-KISS_TFEND = '\xDC'
-KISS_TFESC = '\xDD'
+KISS_FEND = int.from_bytes(b'\xC0', byteorder='big')
+KISS_FESC = int.from_bytes(b'\xDB', byteorder='big')
+KISS_TFEND = int.from_bytes(b'\xDC', byteorder='big')
+KISS_TFESC = int.from_bytes(b'\xDD', byteorder='big')
 
 
 class KISS_Decoder():
@@ -17,7 +17,7 @@ class KISS_Decoder():
     '''
     def __init__(self):
         self.InEscMode = False
-        self.DataBuf = ""
+        self.DataBuf = b""
         self.DecodedLength = 0
 
     def AppendStream(self, stream_data):
@@ -37,14 +37,14 @@ class KISS_Decoder():
                     self.InEscMode = True
 
                 else:
-                    self.DataBuf = self.DataBuf + b
+                    self.DataBuf = self.DataBuf + b.to_bytes(1, byteorder='big')
                     self.DecodedLength += 1
 
             else:
                 if b == KISS_TFEND:
-                    self.DataBuf = self.DataBuf + KISS_FEND
+                    self.DataBuf = self.DataBuf + KISS_FEND.to_bytes(1, byteorder='big')
                 elif b == KISS_TFESC:
-                    self.DataBuf = self.DataBuf + KISS_FESC
+                    self.DataBuf = self.DataBuf + KISS_FESC.to_bytes(1, byteorder='big')
 
                 self.DecodedLength += 1
                 self.InEscMode = False

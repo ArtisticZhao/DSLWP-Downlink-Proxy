@@ -135,6 +135,7 @@ class DataBuf(object):
         '''
         while not self.data_buff.empty():
             data = self.data_buff.get()
+            data['raw_data'] = str(data['raw_data'])
             if isinstance(self.sender, WebSocketClient):
                 # 判断sender类型对数据做不同处理
                 data = json.dumps(data)  # 转json
@@ -147,9 +148,12 @@ class DataBuf(object):
         '''
         @ 输入： 应为grc接收的数据
         '''
+        print('on tcp msg: ' + str(data))
         if self.enable_kiss_decode:
             # 在这里进行kiss解码
             data = self.kiss.AppendStream(data)
+        if data is None:
+            return
         self.create_http_data(data)
         self.data_buff.put(self.http_data)
         self.logger(self.http_data, self.name)  # 存储日志
@@ -160,6 +164,7 @@ class DataBuf(object):
         '''
         @ 生成数据包
         '''
+        
         self.http_data = dict()
         self.http_data = self.info
         self.http_data['raw_data'] = codecs.encode(data, 'hex')

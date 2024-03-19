@@ -66,8 +66,12 @@ class LinkToGRC(threading.Thread):
         select_input = list()
         select_input.append(self.grc_listener)
         while not self.thread_stop:
-            infds, outfds, errfds = select.select(
-                select_input, [], [], 5)
+            try:
+                infds, outfds, errfds = select.select(
+                    select_input, [], [], 5)
+            except OSError:
+                print("OS error!")
+                infds =''
             if len(infds) != 0:
                 if not self.is_connected:
                     conn, addr = self.grc_listener.accept()
