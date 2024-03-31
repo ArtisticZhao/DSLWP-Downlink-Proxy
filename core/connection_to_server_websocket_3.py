@@ -34,6 +34,8 @@ class WebSocketClient(object):
 
             except Exception as e:
                 print("error",repr(e))
+                print('Waiting 10 sec to retry...')
+                time.sleep(10)
                 self._close()
     def recvloop(self):
         while True:
