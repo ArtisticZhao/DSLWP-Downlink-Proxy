@@ -1,3 +1,4 @@
 request
 PyQt5
 websocket-client
+websockets
