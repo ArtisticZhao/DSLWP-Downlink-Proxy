@@ -48,8 +48,8 @@ class MiniWindow(QtWidgets.QWidget):
     def center(self):
         screen = QtWidgets.QDesktopWidget().screenGeometry()
         size = self.geometry()
-        self.move((screen.width() - size.width()) / 2,
-                  (screen.height() - size.height()) / 2)
+        self.move(int((screen.width() - size.width()) / 2),
+                  int((screen.height() - size.height()) / 2))
 
     def check_vaild(self, name, address, port):
         is_vaild = False
