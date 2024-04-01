@@ -752,10 +752,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 server = self.servers.select_server(name)
                 # server[0] is server address
                 url = "http://" + server[0] + ':' + str(server[1])
-                response = requests.get(url=url)
-                if response.text == 'Can "Upgrade" only to "WebSocket".':
-                    status = 0
-                # status == 0 is OK!
+                for each in self.websocket_to_server:
+                    if name == each._name:
+                        status = (0 if each.connected else 1)
+                        break
+                # response = requests.get(url=url, timeout=0.2)
+                # if response.text == 'Can "Upgrade" only to "WebSocket".':
+                #     status = 0
+                # # status == 0 is OK!
                 if status == 0:
                     self.set_server_status(name, 'Connected')
                 else:

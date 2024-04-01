@@ -19,6 +19,7 @@ class WebSocketClient(object):
         self._ws = None
         self._queue = queue.Queue(maxsize=100)  # change queue size from here
         self._time_out = 0
+        self.connected = False
     def clientloop(self):
         while True:
             try:
@@ -26,6 +27,7 @@ class WebSocketClient(object):
 
                     s=websocket.create_connection(self._url)
                     print("connect",s)
+                    self.connected = True
                     self._ws=s
                     self.on_connected()
 
@@ -35,6 +37,7 @@ class WebSocketClient(object):
             except Exception as e:
                 print("error",repr(e))
                 print('Waiting 10 sec to retry...')
+                self.connected = False
                 time.sleep(10)
                 self._close()
     def recvloop(self):
