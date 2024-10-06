@@ -2,3 +2,5 @@
 *.log
 launch.json
 .DS_Store
+test/
+*.dat

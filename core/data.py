@@ -148,17 +148,18 @@ class DataBuf(object):
         '''
         @ 输入： 应为grc接收的数据
         '''
-        print('on tcp msg: ' + str(data))
+        # print('on tcp msg: ' + str(data))
         if self.enable_kiss_decode:
             # 在这里进行kiss解码
             data = self.kiss.AppendStream(data)
         if data is None:
             return
-        self.create_http_data(data)
-        self.data_buff.put(self.http_data)
-        self.logger(self.http_data, self.name)  # 存储日志
-        if self.sender is not None:
-            self.send_signal()
+        for each in data:
+            self.create_http_data(each)
+            self.data_buff.put(self.http_data)
+            self.logger(self.http_data, self.name)  # 存储日志
+            if self.sender is not None:
+                self.send_signal()
 
     def create_http_data(self, data):
         '''

@@ -25,13 +25,14 @@ class KISS_Decoder():
         @ stream_data : kiss 编码的数据，只需要讲KISS数据帧，按照顺序通过
         stream_data传入，当解码完毕后会自动返回数据包，并重置解码器等待下一次解码
         '''
+        all_data = []
         for b in stream_data:
             if not self.InEscMode:
                 if b == KISS_FEND:
                     if self.DecodedLength != 0:
                         data = self.DataBuf
                         self.reset_kiss()
-                        return data  # 解码结束
+                        all_data.append(data)  # 解码结束
 
                 elif b == KISS_FESC:
                     self.InEscMode = True
@@ -48,6 +49,7 @@ class KISS_Decoder():
 
                 self.DecodedLength += 1
                 self.InEscMode = False
+        return all_data
 
     def reset_kiss(self):
         self.DataBuf = b""

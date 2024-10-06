@@ -29,6 +29,7 @@ import PyQt5
 from PyQt5 import QtCore, QtWidgets
 from PyQt5 import QtWidgets as QtGui
 from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtGui import QTextCursor
 
 from Qt.MiniWindow import MiniWindow
 from Qt.Settings import Settings
@@ -701,22 +702,28 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.log_dict[index].flush()
 
     def normal_output_written(self, text):
-        """ Initial output console length and buffer.
+        """ Append new text to the QTextEdit and discard old text if too long.
         """
-        # Append text to the QTextEdit.
+        # Append the new text to the QTextEdit.
+        self.ui.log_text.append(text)
+        
+        # Get the length of the current text.
         str_buf = self.ui.log_text.toPlainText()
-        str_buf = str_buf + text
         length = len(str_buf)
 
-        maxLength = 30000
-        if (length > maxLength):
-            str_buf = str_buf[maxLength:]
+        # Set maximum length for the text buffer.
+        maxLength = 300000
+        if length > maxLength:
+            # Keep only the last 'maxLength' characters.
+            str_buf = str_buf[-maxLength:]
+            
+            # Temporarily block signals to avoid unnecessary updates
+            self.ui.log_text.blockSignals(True)
+            self.ui.log_text.setPlainText(str_buf)
+            self.ui.log_text.blockSignals(False)
 
-        self.ui.log_text.setText(str_buf)
-        textCursor = self.ui.log_text.textCursor()
-        self.ui.log_text.setText(str_buf)
-        textCursor.setPosition(len(str_buf))
-        self.ui.log_text.setTextCursor(textCursor)
+        # Move the cursor to the end of the text.
+        self.ui.log_text.moveCursor(QTextCursor.End)
 
     def on_timer(self):
         """ Set up timer to refresh time.

@@ -73,12 +73,12 @@ class WebSocketClient(object):
                 print(repr(e))
                 await self._close()
                 break
+    
     def on_connected(self):
         while self._queue.empty() is False:
             msg = self._queue.get()
             self._ws.send(msg)
             # self._close()
-
 
     def _close(self):
         if self._ws:

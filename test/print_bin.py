@@ -9,6 +9,6 @@ with open(file_path, 'rb') as file:
     file_content = file.read()
 
 # Convert each byte in the file content to a formatted string
-formatted_output = ''.join(f'\\x{byte:02x}' for byte in file_content)
-
+# formatted_output = ''.join(f'\\x{byte:02x}' for byte in file_content)
+formatted_output = ''.join(f' {byte:02x}' for byte in file_content)
 print(formatted_output)
